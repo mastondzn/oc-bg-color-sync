@@ -2,6 +2,22 @@
 
 Synchronize the terminal's native background color with OpenTUI's renderer background color. Fixes mismatched border/gutter colors in terminals that draw padding outside the application viewport.
 
+## Install
+
+Add the plugin to your OpenCode config (`tui.json`):
+
+```json
+{
+  "plugin": ["oc-bg-color-sync"]
+}
+```
+
+### OR
+
+```sh
+opencode plugin oc-bg-color-sync --global
+```
+
 ## Why
 
 OpenTUI renders its own background, but the terminal emulator may show its own default color in gutters, borders, or padding areas around the app. This plugin emits **OSC 11** whenever the renderer background changes so the terminal stays in sync.
@@ -56,16 +72,6 @@ This plugin restores the OSC 11 sync as a userland workaround until upstream fin
   Format: `\x1b]111\x07`
 
 See [VT100.net OSC 11 docs](https://vtdn.dev/docs/osc/osc11) and [OSC 110-112](https://vtdn.dev/docs/osc/osc110-112) for more.
-
-## Install
-
-Add the plugin to your OpenCode config (`tui.json` or equivalent):
-
-```json
-{
-  "plugin": ["oc-bg-color-sync"]
-}
-```
 
 ## Debugging
 
