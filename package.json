@@ -17,7 +17,6 @@
     "@opentui/solid": "*",
     "solid-js": "*"
   },
-  "private": true,
   "devDependencies": {
     "typescript": "^5",
     "@types/bun": "latest"
