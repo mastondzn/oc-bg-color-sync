@@ -44,6 +44,10 @@ This plugin restores the OSC 11 sync as a userland workaround until upstream fin
 - After the native call, converts the RGBA color to hex and writes `OSC 11;rgb:rr/gg/bb\x07` to stdout
 - On plugin dispose, calls `renderer.resetTerminalBgColor()` which writes `OSC 111\x07`
 
+### Timing fix
+
+`ThemeProvider` calls `setBackgroundColor()` during initial render **before** plugins are loaded. If we only patched the method, the terminal would stay out of sync until the theme changed again. The plugin therefore reads `api.theme.current.background` after patching and calls the patched method once to force an immediate sync.
+
 ### OSC sequence reference
 
 - **OSC 11** — Set terminal background color  
@@ -62,6 +66,23 @@ Add the plugin to your OpenCode config (`tui.json` or equivalent):
   "plugin": ["oc-bg-color-sync"]
 }
 ```
+
+## Debugging
+
+To verify the plugin is emitting OSC sequences, run OpenCode in a terminal that logs escape sequences, or sniff stdout with `script`:
+
+```bash
+# Start a typescript session; all escape sequences are recorded
+script -q /tmp/opencode-osc.log
+opencode
+# quit opencode, then exit the script shell
+exit
+# Search for OSC 11/111 in the log
+grep -o $'\x1b]11;[^\x07]*\x07' /tmp/opencode-osc.log
+grep -o $'\x1b]111\x07' /tmp/opencode-osc.log
+```
+
+You should see an `OSC 11` on startup and an `OSC 111` on exit.
 
 ## Requirements
 
