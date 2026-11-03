@@ -1,23 +1,21 @@
 {
   "name": "oc-bg-color-sync",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "type": "module",
   "exports": {
-    "./tui": {
-      "import": "./index.ts"
-    }
+    "./tui": "./index.ts"
   },
   "files": [
     "index.ts"
   ],
+  "dependencies": {
+    "@opencode/plugin": "latest"
+  },
   "peerDependencies": {
-    "@opencode-ai/plugin": "*",
-    "@opentui/core": "*",
-    "@opentui/solid": "*",
-    "solid-js": "*"
+    "@opentui/core": ">=0.6.6"
   },
   "devDependencies": {
-    "typescript": "^5",
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "typescript": "^5"
   }
 }

@@ -4,18 +4,18 @@ Synchronize the terminal's native background color with OpenTUI's renderer backg
 
 ## Install
 
-Add the plugin to your OpenCode config (`tui.json`):
+Requires OpenCode 2.x. Add the plugin to your OpenCode terminal client config (`~/.config/opencode/cli.json`):
 
 ```json
 {
-  "plugin": ["oc-bg-color-sync"]
+  "plugins": ["oc-bg-color-sync"]
 }
 ```
 
 ### OR
 
 ```sh
-opencode plugin oc-bg-color-sync --global
+opencode plugin add oc-bg-color-sync
 ```
 
 ## Why
@@ -56,13 +56,18 @@ This plugin restores the OSC 11 sync as a userland workaround until upstream fin
 
 ## How it works
 
-- Wraps `renderer.setBackgroundColor()`
-- After the native call, converts the RGBA color to hex and writes `OSC 11;rgb:rr/gg/bb\x07` to stdout
-- On plugin dispose, calls `renderer.resetTerminalBgColor()` which writes `OSC 111\x07`
+- Registers via `Plugin.define` from `@opencode/plugin/tui` (the OpenCode 2 TUI plugin API)
+- Wraps `context.renderer.setBackgroundColor()`
+- After the native call, parses the color with `parseColor` from `@opentui/core` and writes `OSC 11;rgb:rr/gg/bb\x07` to stdout
+- On plugin dispose, writes `OSC 111\x07` to restore the terminal's default background
 
 ### Timing fix
 
-`ThemeProvider` calls `setBackgroundColor()` during initial render **before** plugins are loaded. If we only patched the method, the terminal would stay out of sync until the theme changed again. The plugin therefore reads `api.theme.current.background` after patching and calls the patched method once to force an immediate sync.
+The TUI's theme provider calls `setBackgroundColor()` during its initial render **before** plugins load. If we only patched the method, the terminal would stay out of sync until the theme changed again. The plugin therefore reads `context.theme.background.base` after patching and calls the patched method once to force an immediate sync.
+
+### Hot-reload safety
+
+OpenCode 2 reloads plugins on config changes without restarting the TUI. The cleanup function restores the original `setBackgroundColor` (verified by identity, so it never stomps a newer plugin generation or another plugin's patch) before emitting `OSC 111`, so each reload unwinds cleanly instead of stacking wrappers.
 
 ### OSC sequence reference
 
@@ -92,6 +97,7 @@ You should see an `OSC 11` on startup and an `OSC 111` on exit.
 
 ## Requirements
 
+- OpenCode 2.x
 - A terminal emulator that supports OSC 11/111 (most modern terminals do; Ghostty has quirks with theme detection after OSC 11/111 usage)
 
 ## License
